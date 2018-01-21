@@ -187,3 +187,6 @@ Feel free to follow me on:
 
 * Medium: https://medium.com/@zzdjk6
 * Github: https://github.com/zzdjk6
+
+* One more thing: 
+  * with free city library account, we can enjoy Lynda.com for free. 
