@@ -134,10 +134,10 @@ public class MainActivity extends AppCompatActivity {
     private void loadWeather() {
         WeatherApi
                 .fetchWeather()
+                .retry(3)
                 .map(weather -> weather.location + ": " + weather.temperature + ", " + weather.condition)
                 .onErrorReturn(throwable -> "Failed to load weather")
                 .observeOn(AndroidSchedulers.mainThread())
-                .retry(3)
                 .subscribe(text -> {
                     TextView textView = findViewById(R.id.weatherText);
                     textView.setText(text);

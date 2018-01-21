@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.yheriatovych.reductor.Action;
+import com.yheriatovych.reductor.Middleware;
 import com.yheriatovych.reductor.Store;
 
 import java.util.UUID;
@@ -18,7 +19,9 @@ import info.zzdjk6.todolist.reducers.AppStateReducer;
 import info.zzdjk6.todolist.states.AppState;
 import info.zzdjk6.todolist.states.StateHistory;
 
-
+// The Application class in Android is the base class within an Android app that
+// contains all other components such as activities and services.
+// It can be used for maintaining global application state.
 public class TodoListApplication extends Application {
 
     Store<AppState> mStore;
@@ -29,13 +32,47 @@ public class TodoListApplication extends Application {
         super.onCreate();
 
         mStateHistory = new StateHistory<>();
+
+        Middleware<AppState> historyMiddleware = (store, nextDispatcher) -> action -> {
+            nextDispatcher.dispatch(action);
+
+            Action act = (Action) action;
+            if (!act.type.equals(AppActions.SET_STATE)) {
+                mStateHistory.pushState(store.getState());
+            }
+        };
+
+        Middleware<AppState> logMiddleware = (store, nextDispatcher) -> action -> {
+            nextDispatcher.dispatch(action);
+            Log.d(TodoListApplication.class.toString(), store.getState().toString());
+        };
+
         mStore = Store.create(
-                new AppStateReducer(mStateHistory),
-                new AppState(ImmutableList.of(), TodoFilter.ALL)
+                new AppStateReducer(),
+                new AppState(ImmutableList.of(), TodoFilter.ALL),
+                historyMiddleware, logMiddleware
         );
-        mStore.subscribe(state -> Log.d(TodoListApplication.class.toString(), state.toString()));
+        mStateHistory.pushState(mStore.getState());
+
+        //testStateChanges();
 
         loadState();
+    }
+
+    private void testStateChanges() {
+        addTodoItem("a");
+        addTodoItem("b");
+        addTodoItem("c");
+        changeTodoItemText(mStore.getState().todoItems.get(1).getId(), "bb");
+        changeTodoItemState(mStore.getState().todoItems.get(1).getId(), true);
+        undo();
+        undo();
+        undo();
+        undo();
+        redo();
+        redo();
+        redo();
+        redo();
     }
 
     private void loadState() {

@@ -18,6 +18,8 @@ import io.reactivex.subjects.PublishSubject;
 public class TodoItemRecyclerViewAdapter extends RecyclerView.Adapter<TodoItemRecyclerViewAdapter.ViewHolder> {
 
     private List<TodoItem> mItems = new ArrayList<>();
+
+    // Observer pattern
     PublishSubject<TodoItem> onTodoItemEditClicked = PublishSubject.create();
     PublishSubject<TodoItem> onTodoItemDeleteClicked = PublishSubject.create();
     PublishSubject<TodoItem> onTodoItemToggleCheckClicked = PublishSubject.create();
@@ -32,11 +34,15 @@ public class TodoItemRecyclerViewAdapter extends RecyclerView.Adapter<TodoItemRe
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         TodoItem item = mItems.get(position);
+
+        // bind data to ui
         holder.mItem = item;
         holder.mContentTextView.setText(item.getText());
+        holder.mCheckBox.setChecked(item.isChecked());
+
+        // bind input event
         holder.mEditButton.setOnClickListener(view -> onTodoItemEditClicked.onNext(item));
         holder.mDeleteButton.setOnClickListener(view -> onTodoItemDeleteClicked.onNext(item));
-        holder.mCheckBox.setChecked(item.isChecked());
         holder.mCheckBox.setOnClickListener(view -> onTodoItemToggleCheckClicked.onNext(item));
     }
 
@@ -47,6 +53,8 @@ public class TodoItemRecyclerViewAdapter extends RecyclerView.Adapter<TodoItemRe
 
     void setItems(List<TodoItem> items) {
         this.mItems = items;
+
+        // call this function to let recycler view re-render
         notifyDataSetChanged();
     }
 
